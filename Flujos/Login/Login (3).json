@@ -1,0 +1,195 @@
+{
+  "name": "Login",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "login",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -480,
+        -64
+      ],
+      "id": "444668f2-e751-4ca0-b91c-90061ca28fae",
+      "name": "Webhook",
+      "webhookId": "ea37a197-32c9-4d64-bb6a-9846c1a0626d"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\nid_usuario,\nnombre, \napellido, \ncorreo, \nusuario,\ncontraseya, \nes_activo, \nfecha_eliminacion,\nusuario_eliminacion\nfrom usuario\nwhere usuario= '{{ $json.body.usuario }}'\nand contraseya= encriptar('{{ $json.body.contraseya }}')\nand fecha_eliminacion is null;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -272,
+        -64
+      ],
+      "id": "a8e64ae9-0064-459d-a0b9-02a5514bff3b",
+      "name": "Execute a SQL query",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e2dca9d4-bcfd-46af-b68f-99c0b9d4a998",
+              "leftValue": "={{ $json.id_usuario }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        -64
+      ],
+      "id": "02577f5e-5383-41f2-bd44-9de1b1f967ae",
+      "name": "Validar contraseña"
+    },
+    {
+      "parameters": {
+        "useJson": true,
+        "claimsJson": "={\n  \"id_usuario\": \"{{ $json.id_usuario }}\",\n  \"nombre\": \"{{ $json.nombre }} {{ $json.apellido }}\",\n  \"correo\": \"{{ $json.correo }}\",\n  \"usuario\": \"{{ $json.usuario }}\",\n  \"activo\": {{ $json.es_activo }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -160
+      ],
+      "id": "7bb23416-6cd3-4747-94aa-912792bc82b6",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "NAtgWw8LXiS3582w",
+          "name": "JWT Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"codigo\": 1,\n  \"mensaje\": \"Autenticación exitosa\",\n  \"token\": \"{{ $json.token }}\", \n  \"Datos\": {\n    \"id\": \"{{ $('Execute a SQL query').item.json.id_usuario }}\",\n    \"nombre\": \"{{ $('Execute a SQL query').item.json.nombre }}\",\n\"apellido\":\"{{ $('Execute a SQL query').item.json.apellido }}\",\n    \"usuario\": \"{{ $('Execute a SQL query').item.json.usuario }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        352,
+        -160
+      ],
+      "id": "4daef7a2-e8be-4809-bc91-697ce6cb939d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": 0,\n  \"error\": \"Los datos son incorrectos\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        144,
+        32
+      ],
+      "id": "143f0faf-accd-4965-a1bf-eed1047087b3",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Validar contraseña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar contraseña": {
+      "main": [
+        [
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "caf61e6d-0a4a-482f-8d1f-4ec6508663ea",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "biv4n9aRYXTy18UM",
+  "tags": []
+}

@@ -1,0 +1,225 @@
+{
+  "name": "Baja_catalogo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "baja_catalogo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -544,
+        -64
+      ],
+      "id": "d0ceda5f-725a-461f-a4ba-e771a271a6c0",
+      "name": "Webhook",
+      "webhookId": "61e0a910-8a5e-4fc1-9cdf-de709d203c1c"
+    },
+    {
+      "parameters": {
+        "operation": "decode",
+        "token": "={{ $json.body.token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -64
+      ],
+      "id": "f5c6f00c-6b39-4b57-87af-7f3e5257110e",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "NAtgWw8LXiS3582w",
+          "name": "JWT Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE catalogo\nSET\n    fecha_eliminacion = '{{ $now.format(\"yyyy-MM-dd HH:mm:ss\") }}',,\n    usuario_eliminacion = {{ $('JWT').item.json.payload.id_usuario }}\nWHERE id_catalogo = {{ $('Webhook').item.json.body.id_catalogo }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        192,
+        -160
+      ],
+      "id": "de9b90e4-6176-43fa-9f82-2803f5cffb81",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a0dd85cb-8f9b-486e-84f4-42721a949c6a",
+              "leftValue": "={{ $json.rol }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        32,
+        -64
+      ],
+      "id": "5ec80ace-0dd6-440c-8fc6-2782f1df17bd",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"1\",\n  \"mensaje\": \" Los datos han sido eliminados correctamente\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        -160
+      ],
+      "id": "dfa20f61-4689-4030-b289-2852ca4b8cf8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"0\",\n \"mensaje\": \"error\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        32
+      ],
+      "id": "04695934-65a1-4c42-8768-b3948f6ddee9",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT rol\nFROM usuario\nWHERE id_usuario = {{ $json.payload.id_usuario }}\nAND es_activo = 1\nAND fecha_eliminacion IS NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -144,
+        -64
+      ],
+      "id": "b66f45f0-64a9-4e02-a971-5b3ed5569855",
+      "name": "es administrador?",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "es administrador?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "es administrador?": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "376d0039-06c4-41c0-afb4-7289c81efd8c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "V5a2Gl6xShiUYClc",
+  "tags": []
+}

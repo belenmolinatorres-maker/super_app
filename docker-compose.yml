@@ -1,0 +1,9 @@
+services:
+  api:
+    build: .
+    container_name: super-app-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - src/.env
+    restart: unless-stopped

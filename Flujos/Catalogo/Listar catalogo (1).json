@@ -1,0 +1,95 @@
+{
+  "name": "Listar catalogo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "listar_catalogo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "03393a90-1d26-4286-9841-ba309fda5f65",
+      "name": "Webhook",
+      "webhookId": "c3e34a43-272d-4874-8cf5-2cb4556af68c"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select id_catalogo, nombre, imagen,descripcion, direccion_enlace\nfrom catalogo\nwhere fecha_eliminacion is null;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7c9840c1-2e2c-4039-bee3-8192f19b208e",
+      "name": "Execute a SQL query",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a9cd1f15-af53-44d1-8a95-e93cb92facf9",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "899a9ea2-83de-40c0-8da5-34668dca4286",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "cN7hJNdH8lPCdK8w",
+  "tags": []
+}

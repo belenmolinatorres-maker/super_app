@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "Super_app": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@toolbox-sdk/server",
+        "--prebuilt=mysql",
+        "--stdio"
+      ],
+      "env": {
+        "MYSQL_HOST": "187.124.44.107",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "super_app",
+        "MYSQL_PASSWORD": "180820",
+        "MYSQL_DATABASE": "app_multiapp"
+      }
+    }
+  }
+}

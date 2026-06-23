@@ -1,0 +1,253 @@
+{
+  "name": "Editar_catalogo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "editar_catalogo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -352,
+        -48
+      ],
+      "id": "0665e230-53d9-4871-bc00-13d28195c7e5",
+      "name": "Webhook",
+      "webhookId": "6db31a6a-4b83-4ba7-b27f-02554ee05522"
+    },
+    {
+      "parameters": {
+        "operation": "decode",
+        "token": "={{ $json.body.token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -48
+      ],
+      "id": "a6dabf80-0f1e-4f5c-bf9d-7405229191fa",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "NAtgWw8LXiS3582w",
+          "name": "JWT Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT rol\nFROM usuario\nWHERE id_usuario = {{ $json.payload.id_usuario }}\nAND es_activo = 1\nAND fecha_eliminacion IS NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        64,
+        -48
+      ],
+      "id": "1b73179c-4c59-4e1c-91ae-42edc751abfa",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bdad4eb8-e9a0-4aac-ba96-ddaee99bd4e1",
+              "leftValue": "={{ $json.rol }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        -48
+      ],
+      "id": "e39ab200-77b9-4df4-a51e-569534cab481",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": {
+          "__rl": true,
+          "value": "catalogo",
+          "mode": "list",
+          "cachedResultName": "catalogo"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "id_catalogo",
+        "valueToMatchOn": "={{ $('Webhook').item.json.body.Datos.id_catalogo }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "nombre",
+              "value": "={{ $('Webhook').item.json.body.Datos.nombre }}"
+            },
+            {
+              "column": "imagen",
+              "value": "={{ $('Webhook').item.json.body.Datos.imagen }}"
+            },
+            {
+              "column": "descripcion",
+              "value": "={{ $('Webhook').item.json.body.Datos.descripcion }}"
+            },
+            {
+              "column": "direccion_enlace",
+              "value": "={{ $('Webhook').item.json.body.Datos.direccion_enlace }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        480,
+        -112
+      ],
+      "id": "7e8559fb-6725-4c1b-aa3f-50bed21cc94b",
+      "name": "Update rows in a table",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"1\",\n  \"mensaje\": \"Catálogo editado correctamente\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        688,
+        -112
+      ],
+      "id": "720987d4-eb91-44ff-92b5-9b7d6d324e17",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"2\",\n  \"mensaje\": \" Error\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        32
+      ],
+      "id": "2f20f261-f8fb-4d6a-a4ef-d2b83bbe8735",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "516aedac-e122-46a4-b348-7d540e005052",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "bAqazXT6pUz7VSaj",
+  "tags": []
+}

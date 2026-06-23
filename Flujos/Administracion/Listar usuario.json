@@ -1,0 +1,224 @@
+{
+  "name": "Listar usuario",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "listar_usuario",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -704,
+        -128
+      ],
+      "id": "6a89ac72-49d0-4275-bb60-bf5d5aa059ca",
+      "name": "Webhook",
+      "webhookId": "cf59ba41-3c20-4a95-8922-8e9fd4e5be7d"
+    },
+    {
+      "parameters": {
+        "operation": "decode",
+        "token": "={{ $json.body.token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        -128
+      ],
+      "id": "bf521513-091d-445e-920f-3fe71bf7d1cf",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "NAtgWw8LXiS3582w",
+          "name": "JWT Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT rol\nFROM usuario\nWHERE id_usuario = {{ $json.payload.id_usuario }}\nAND es_activo = 1\nAND fecha_eliminacion IS NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -288,
+        -128
+      ],
+      "id": "3d93bb52-24ba-45bd-bdd1-f2fa16481fe0",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "37ea33dd-fa0e-47a6-ad12-ec284bdeb4b6",
+              "leftValue": "={{ $json.rol }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -80,
+        -128
+      ],
+      "id": "1990d7bb-56b9-412d-85a0-f01680604ce8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"0\",\n  \"mensaje\":\"error\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        128,
+        -32
+      ],
+      "id": "26956f83-aad3-42ca-8b1a-9e883d684989",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    id_usuario,\n    nombre,\n    apellido,\n    correo,\n    usuario,\n    rol\nFROM usuario\nWHERE es_activo = 1\nAND fecha_eliminacion IS NULL\nORDER BY nombre;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        112,
+        -224
+      ],
+      "id": "f9eff952-76cd-44e5-973d-db3a296f4aa4",
+      "name": "Listar",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        320,
+        -224
+      ],
+      "id": "e32b3813-d78c-4b0d-8fb5-7c3caaf34bc2",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Listar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "47313eef-d99c-4039-8f76-ad6fc6d5fbe8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "ijstMTizfbth5oGB",
+  "tags": []
+}

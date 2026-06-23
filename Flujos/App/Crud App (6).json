@@ -1,0 +1,427 @@
+{
+  "name": "Crud App",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crud_app",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        144
+      ],
+      "id": "e8d9d7b9-e53a-4f6e-b77d-07a7dd91d08d",
+      "name": "Webhook",
+      "webhookId": "9eff32ea-3f4b-415f-8c2a-b14b1edeb059"
+    },
+    {
+      "parameters": {
+        "operation": "decode",
+        "token": "={{ $json.body.token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        144
+      ],
+      "id": "aade4507-ef87-4522-88d5-5d89f933dd19",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "NAtgWw8LXiS3582w",
+          "name": "JWT Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.funcion }}",
+                    "rightValue": "Crea",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f1f50a0d-840d-47c1-b711-17902d8bcc84"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Crear App"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "be5a2a8d-3c14-4346-a543-f503767a0112",
+                    "leftValue": "={{ $('Webhook').item.json.body.funcion }}",
+                    "rightValue": "Editar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Editar App"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "530f1ae2-a592-467c-b1cc-b425fd82599c",
+                    "leftValue": "={{ $('Webhook').item.json.body.funcion }}",
+                    "rightValue": "Eliminar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Elimina App"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        160
+      ],
+      "id": "83963286-785a-46dd-a4ac-d729f6c40074",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"1\",\n  \"mensaje\": \"Aplicación añadida correctamente a tu panel\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        208,
+        80
+      ],
+      "id": "24d95121-5d7a-42ae-b17c-299d808939d5",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE app SET\n  fecha_eliminacion = NOW(),\n  usuario_eliminacion = {{ $json.payload.id_usuario }}\nWHERE id_app = {{ $('Webhook').item.json.body.Aplicacion.id_app }}\n  AND usuario = {{ $json.payload.id_usuario }}\n  AND fecha_eliminacion IS NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        16,
+        288
+      ],
+      "id": "a55caf72-fdd2-4312-98b3-c383b36c7b93",
+      "name": "inserta fecha eliminacion",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE app SET\n  catalogo = {{ $('Webhook').item.json.body.Aplicacion.catalogo }},\n  titulo = '{{ $('Webhook').item.json.body.Aplicacion.titulo }}',\n  direccion_enlace = COALESCE(\n    NULLIF(NULLIF(TRIM('{{ $('Webhook').item.json.body.Aplicacion.direccion_enlace }}'), ''), 'undefined'),\n    (SELECT c.direccion_enlace FROM catalogo c WHERE c.id_catalogo = {{ $('Webhook').item.json.body.Aplicacion.catalogo }}),\n    ''\n  ),\n  descripcion = '{{ $('Webhook').item.json.body.Aplicacion.descripcion }}',\n  admin = '{{ $('Webhook').item.json.body.Aplicacion.admin }}',\n  contraseya = encriptar_pass_miniapp('{{ $('Webhook').item.json.body.Aplicacion.contraseya }}')\nWHERE id_app = {{ $('Webhook').item.json.body.Aplicacion.id_app }}\n  AND usuario = {{ $('JWT').item.json.payload.id_usuario }}\n  AND fecha_eliminacion IS NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        16,
+        128
+      ],
+      "id": "1d8c69fa-d3d1-44a7-ba99-f878752021fc",
+      "name": "actualiza datos",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "app",
+          "mode": "list",
+          "cachedResultName": "app"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "catalogo",
+              "value": "={{ $('Webhook').item.json.body.Aplicacion.catalogo }}"
+            },
+            {
+              "column": "usuario",
+              "value": "={{ $json.payload.id_usuario }}"
+            },
+            {
+              "column": "titulo",
+              "value": "={{ $('Webhook').item.json.body.Aplicacion.titulo }}"
+            },
+            {
+              "column": "descripcion",
+              "value": "={{ $('Webhook').item.json.body.Aplicacion.descripcion }}"
+            },
+            {
+              "column": "direccion_enlace",
+              "value": "={{ $('Webhook').item.json.body.Aplicacion.direccion_enlace }}"
+            },
+            {
+              "column": "admin",
+              "value": "={{ $('Webhook').item.json.body.Aplicacion.admin }}"
+            },
+            {
+              "column": "contraseya",
+              "value": "={{ $('Webhook').item.json.body.Aplicacion.contraseya }}"
+            },
+            {
+              "column": "fecha_creacion",
+              "value": "={{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "c2ec3652-3f09-42be-a4ea-84beb8d08fd7",
+      "name": "crea app",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ae9e0c80-f9bd-4680-819b-4ac1f1fbcac0",
+              "leftValue": "={{ $json.payload.id_usuario }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -416,
+        144
+      ],
+      "id": "e02be955-3a36-4259-9a9b-23bbc2a978d0",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"1\",\n  \"mensaje\": \"Aplicación Eliminada\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        192,
+        272
+      ],
+      "id": "878e294c-99c7-4352-bb51-7ee5f1c8e60d",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"0\",\n  \"mensaje\":\"Error\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -320,
+        320
+      ],
+      "id": "99d7f55a-8f18-4c1e-a186-3b6221120f45",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "crea app",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "actualiza datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "inserta fecha eliminacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserta fecha eliminacion": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualiza datos": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crea app": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6a0edf68-b5f7-41f5-9b04-33065494cc23",
+  "meta": {
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "FZcP2KQLPl1w2dz2",
+  "tags": []
+}

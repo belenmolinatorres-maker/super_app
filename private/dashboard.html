@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Súper App</title>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-white min-h-screen relative overflow-x-hidden">
+    
+    <!-- Marca de agua de fondo -->
+    <div class="fixed inset-0 flex items-center justify-center opacity-[0.05] pointer-events-none z-0">
+        <img src="https://ideasypruebas2.es/cursos/IFCT0211/Belen/logo_gestion.png" alt="Watermark" class="w-[500px] grayscale">
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="relative z-10 p-6 md:p-12 min-h-screen flex flex-col">
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    Bienvenido, <span id="userName" class="text-indigo-600">...</span>
+                </h1>
+                <p class="text-slate-500 mt-2">Gestiona tus aplicaciones y herramientas</p>
+
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Búsqueda compacta -->
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="appSearch" placeholder="Buscar..." 
+                        class="w-32 lg:w-40 pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all text-xs placeholder:text-slate-300">
+                </div>
+                <!-- Botón Menú Hamburguesa -->
+                <button id="menuBtn" class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-600 hover:text-indigo-600 hover:border-indigo-100 transition-all">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar Lateral -->
+        <div id="userSidebar" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 ease-in-out border-l border-slate-100 flex flex-col">
+            <!-- Header Sidebar -->
+            <div class="p-8 border-b border-slate-50 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-slate-900">Mi Perfil</h3>
+                <button id="closeSidebarBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Contenido Usuario -->
+            <div class="p-8 flex-1 overflow-y-auto">
+                <div class="text-center mb-8">
+                    <div class="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl border-4 border-white shadow-lg">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4 id="sideUserName" class="text-lg font-bold text-slate-900 leading-tight">...</h4>
+                    <p id="sideUserEmail" class="text-slate-400 text-sm mt-1">...</p>
+                </div>
+
+                <nav class="space-y-2">
+                    <button id="editProfileBtn" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all font-semibold group">
+                        <i class="fas fa-user-edit text-slate-400 group-hover:text-indigo-500"></i>
+                        <span>Editar Perfil</span>
+                    </button>
+                    
+                    <a href="admin.html" id="sideAdminBtn" class="hidden w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all font-semibold group">
+                        <i class="fas fa-user-shield text-slate-400 group-hover:text-indigo-500"></i>
+                        <span>Administración</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Footer Sidebar (Logout) -->
+            <div class="p-8 border-t border-slate-50 bg-slate-50/50">
+                <button id="sideLogoutBtn" class="w-full flex items-center justify-center gap-3 py-4 bg-white border border-red-100 text-red-600 font-bold rounded-2xl hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Overlay para Sidebar -->
+        <div id="sidebarOverlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[65] transition-opacity duration-300"></div>
+
+        <main>
+            <!-- Grid de Aplicaciones (Contenedor vacío para dashboard.js) -->
+            <div id="appsGrid" class="mb-12">
+                <div id="loadingIndicator" class="flex flex-col items-center justify-center py-20 text-slate-400">
+                    <i class="fas fa-circle-notch animate-spin text-4xl mb-4"></i>
+                    <p class="text-sm font-semibold">Cargando tus aplicaciones...</p>
+                </div>
+                <!-- Botón Añadir App (Siempre visible) -->
+                <button id="addAppBtn" class="group flex flex-col items-center justify-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl hover:border-indigo-500 hover:bg-white transition-all duration-300 transform hover:scale-[1.02] max-w-sm mx-auto w-full">
+                    <div class="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:bg-indigo-500 transition-colors">
+                        <i class="fas fa-plus text-slate-400 text-xl group-hover:text-white"></i>
+                    </div>
+                    <span class="text-slate-600 font-bold tracking-wide">Añadir</span>
+                    <span class="text-xs text-slate-400 mt-1 uppercase">Nueva App</span>
+                </button>
+            </div>
+        </main>
+
+        <footer class="mt-auto pt-12 pb-8 text-center">
+            <p class="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">
+                © 2026 Gestión de Sistemas • Todos los derechos reservados
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal de Editar Perfil -->
+    <div id="editProfileModal" class="hidden fixed inset-0 z-[80] overflow-y-auto bg-slate-950/90 backdrop-blur-sm p-4 md:p-8">
+        <div class="flex min-h-full items-center justify-center">
+            <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 my-auto">
+                <header class="flex justify-between items-center mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                            <i class="fas fa-user-edit text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Editar Perfil</h3>
+                            <p class="text-slate-500 text-xs">Actualiza tu información personal</p>
+                        </div>
+                    </div>
+                    <button id="closeEditProfileModalBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </header>
+
+                <form id="editProfileForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label for="edit_nombre" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Nombre</label>
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="edit_nombre" name="nombre" placeholder="Nombre" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label for="edit_apellido" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Apellido</label>
+                            <div class="relative">
+                                <i class="fas fa-signature absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="edit_apellido" name="apellido" placeholder="Apellido" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="edit_correo" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Correo Electrónico</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="email" id="edit_correo" name="correo" placeholder="correo@ejemplo.com" required
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div id="editProfileError" class="hidden p-4 bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl flex items-center gap-3">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="editProfileErrorMessage">Error al actualizar perfil.</span>
+                    </div>
+
+                    <button type="submit" id="saveProfileBtn" class="w-full mt-4 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-3 text-sm">
+                        <i class="fas fa-save"></i>
+                        <span>Guardar Cambios</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Edición de Perfil -->
+    <div id="confirmEditProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-indigo-50 text-indigo-600">
+                <i class="fas fa-question-circle text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">¿Guardar Cambios?</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">¿Estás seguro de que deseas actualizar tu información de perfil? Algunos cambios podrían requerir un nuevo inicio de sesión.</p>
+            
+            <div class="flex flex-col gap-3">
+                <button id="confirmSaveProfileBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors text-sm">
+                    Sí, guardar cambios
+                </button>
+                <button id="cancelSaveProfileBtn" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors text-sm">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Notificación -->
+    <div id="notificationModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div id="notificationIconContainer" class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-indigo-50 text-indigo-600">
+                <i id="notificationIcon" class="fas fa-check-circle text-3xl"></i>
+            </div>
+            <h3 id="notificationTitle" class="text-xl font-bold text-slate-900 mb-2">Éxito</h3>
+            <p id="notificationMessage" class="text-slate-500 text-sm mb-8 leading-relaxed">Operación realizada correctamente.</p>
+            
+            <button id="closeNotificationBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors text-sm">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Cierre de Sesión -->
+    <div id="logoutModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-indigo-50 text-indigo-600">
+                <i class="fas fa-sign-out-alt text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">¿Cerrar Sesión?</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">Estás a punto de salir del sistema. ¿Estás seguro de que deseas finalizar tu sesión actual?</p>
+            
+            <div class="flex flex-col gap-3">
+                <button id="confirmLogoutBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors text-sm">
+                    Sí, cerrar sesión
+                </button>
+                <button id="cancelLogoutBtn" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors text-sm">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación de App -->
+    <div id="deleteModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-red-50 text-red-500">
+                <i class="fas fa-trash-alt text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">¿Eliminar Aplicación?</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">Esta acción desactivará el acceso a <span id="deleteAppName" class="font-bold text-slate-700">esta aplicación</span>. No se borrarán tus datos externos, pero ya no aparecerá en tu panel.</p>
+            
+            <div class="flex flex-col gap-3">
+                <button id="confirmDeleteBtn" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors text-sm">
+                    Sí, eliminar ahora
+                </button>
+                <button id="cancelDeleteBtn" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors text-sm">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal del Catálogo de Aplicaciones -->
+    <div id="catalogModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+            <!-- Header del Modal -->
+            <div class="p-8 border-b border-slate-50">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900">Catálogo de Aplicaciones</h3>
+                        <p class="text-slate-500 text-sm mt-1">Selecciona una herramienta para añadirla a tu panel</p>
+                    </div>
+                    <button id="closeCatalogBtn" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <!-- Buscador -->
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="catalogSearch" placeholder="Buscar aplicaciones..." 
+                        class="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all text-sm">
+                </div>
+            </div>
+            
+            <!-- Cuerpo del Modal (Scrollable) -->
+            <div class="p-8 overflow-y-auto flex-1">
+                <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Los items del catálogo se cargarán aquí -->
+                </div>
+                <!-- Contenedor dedicado para el formulario -->
+                <div id="formContainer" class="hidden"></div>
+            </div>
+
+            <!-- Footer del Modal -->
+            <div class="p-6 bg-slate-50 rounded-b-3xl border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-400 font-medium uppercase tracking-widest">Súper App Multiapp v1.0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Verificación de Acceso a App -->
+    <div id="accessModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-indigo-50 text-indigo-600">
+                <i class="fas fa-lock text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-1" id="accessModalTitle">Acceder a App</h3>
+            <p class="text-slate-500 text-sm mb-6">Ingresa tus credenciales para continuar</p>
+
+            <div id="accessError" class="hidden mb-4 p-3 bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl flex items-center gap-2">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="accessErrorMessage">Credenciales incorrectas.</span>
+            </div>
+
+            <form id="accessForm" class="space-y-4 text-left">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Usuario</label>
+                    <div class="relative mt-1">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                            <i class="fas fa-user text-xs"></i>
+                        </span>
+                        <input type="text" id="accessUser" readonly
+                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-500 cursor-not-allowed">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Contraseña</label>
+                    <div class="relative mt-1">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                            <i class="fas fa-lock text-xs"></i>
+                        </span>
+                        <input type="password" id="accessPass" placeholder="Escribe tu contraseña"
+                            class="w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3 pt-2">
+                    <button type="submit" id="accessConfirmBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-indigo-100">
+                        <i class="fas fa-arrow-right mr-2"></i> Acceder
+                    </button>
+                    <button type="button" id="accessCancelBtn" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Carga (Procesando Solicitud) -->
+    <div id="loadingModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-10 text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 bg-indigo-50 text-indigo-600">
+                <i class="fas fa-circle-notch animate-spin text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-extrabold text-slate-900 mb-2 tracking-tight">Procesando</h3>
+            <p class="text-slate-500 text-sm leading-relaxed font-medium">Estamos gestionando tu solicitud, por favor espera un momento...</p>
+            
+            <div class="mt-8 flex justify-center">
+                <span class="px-4 py-1.5 bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full border border-slate-100">
+                    No cierres esta ventana
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

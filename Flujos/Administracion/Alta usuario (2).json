@@ -1,0 +1,263 @@
+{
+  "name": "Alta usuario",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "alta_usuario",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        -128
+      ],
+      "id": "179f0b5e-3ca1-48dc-942a-df52b9d928c4",
+      "name": "Webhook",
+      "webhookId": "bf9badd8-c555-48dd-a2f5-a7d3083675ab"
+    },
+    {
+      "parameters": {
+        "operation": "decode",
+        "token": "={{ $json.body.token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -128
+      ],
+      "id": "0f45e322-83df-4371-9b6b-1a15a2fef528",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "NAtgWw8LXiS3582w",
+          "name": "JWT Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT rol\nFROM usuario\nWHERE id_usuario = {{ $json.payload.id_usuario }}\nAND es_activo = 1\nAND fecha_eliminacion IS NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -240,
+        -128
+      ],
+      "id": "c8a0b118-881f-41c1-ab50-4ba268a89b42",
+      "name": "comprobar si es administrador",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2cfb9460-2a4d-4652-99be-ed111fc1f375",
+              "leftValue": "={{ $json.rol }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        48,
+        -208
+      ],
+      "id": "2c06c8a5-8d9f-46a4-bb56-53b227f35438",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"0\",\n  \"mensaje\":\"error\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        288,
+        -96
+      ],
+      "id": "d96d4b0e-20f1-4f92-b449-ead34438180b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"1\",\n  \"mensaje\": \"Usuario creado correctamente\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        496,
+        -224
+      ],
+      "id": "feca8f69-bed2-4480-aa35-71a22b3ac21b",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "usuario",
+          "mode": "list",
+          "cachedResultName": "usuario"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "nombre",
+              "value": "={{ $('Webhook').item.json.body.nombre }}"
+            },
+            {
+              "column": "apellido",
+              "value": "={{ $('Webhook').item.json.body.apellido }}"
+            },
+            {
+              "column": "correo",
+              "value": "={{ $('Webhook').item.json.body.correo }}"
+            },
+            {
+              "column": "usuario",
+              "value": "={{ $('Webhook').item.json.body.usuario }}"
+            },
+            {
+              "column": "contraseya",
+              "value": "={{ $('Webhook').item.json.body.contraseya }}"
+            },
+            {
+              "column": "rol",
+              "value": "={{ $('Webhook').item.json.body.rol }}"
+            },
+            {
+              "column": "es_activo",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        304,
+        -336
+      ],
+      "id": "1085ae45-4e65-403c-8858-bd423f4300cb",
+      "name": "Insert rows in a table",
+      "alwaysOutputData": false,
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "comprobar si es administrador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "comprobar si es administrador": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1e4cbc71-3b13-4f58-9a56-c3bc614f3599",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "16Z8ngpflVt4X30c",
+  "tags": []
+}

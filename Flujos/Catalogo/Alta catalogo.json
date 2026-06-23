@@ -1,0 +1,254 @@
+{
+  "name": "Alta catalogo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "alta_catologo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        0
+      ],
+      "id": "6740df0d-4456-4856-96a8-ff57081441bd",
+      "name": "Webhook",
+      "webhookId": "a1f9c21f-f020-419f-9c2a-c3f41f3d7b5a"
+    },
+    {
+      "parameters": {
+        "operation": "decode",
+        "token": "={{ $json.body.token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        0
+      ],
+      "id": "ccec9b3a-7bb4-44df-802f-ab80245c6a8e",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "NAtgWw8LXiS3582w",
+          "name": "JWT Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"1\",\n  \"mensaje\": \"Catálogo creado correctamente\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        160,
+        -128
+      ],
+      "id": "38977d70-89df-4b21-b159-94fbffd54e93",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "catalogo",
+          "mode": "list",
+          "cachedResultName": "catalogo"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "nombre",
+              "value": "={{ $('Webhook').item.json.body.Datos.nombre }}"
+            },
+            {
+              "column": "imagen",
+              "value": "={{ $('Webhook').item.json.body.Datos.imagen }}"
+            },
+            {
+              "column": "descripcion",
+              "value": "={{ $('Webhook').item.json.body.Datos.descripcion }}"
+            },
+            {
+              "column": "fecha_creacion",
+              "value": "={{ $now.format(\"yyyy-MM-dd HH:mm:ss\") }}"
+            },
+            {
+              "column": "direccion_enlace",
+              "value": "={{ $('Webhook').item.json.body.Datos.direccion_enlace }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -16,
+        -128
+      ],
+      "id": "50f2043a-57ee-4c3d-a2a5-89cac12af996",
+      "name": "Alta catalogo",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2658538a-7d22-4389-89ee-2c141f0775e6",
+              "leftValue": "={{ $json.rol }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "2e9a6b37-d07e-4427-8ac4-b58bd940b9f0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"codigo\": \"0\",\n  \"mensaje\":\"error\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -16,
+        112
+      ],
+      "id": "e1debb94-3e54-4736-a813-6793f7353468",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT rol\nFROM usuario\nWHERE id_usuario = {{ $json.payload.id_usuario }}\nAND es_activo = 1\nAND fecha_eliminacion IS NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -336,
+        0
+      ],
+      "id": "16c8e237-bfcd-4488-90dd-2ca27d31c38b",
+      "name": "asegurar que es administrador",
+      "credentials": {
+        "mySql": {
+          "id": "nEemgjjGjM5eLhTw",
+          "name": "superApp"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "asegurar que es administrador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alta catalogo": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Alta catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "asegurar que es administrador": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3ccb2791-f105-4cf6-8469-063a9a520f5a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42eec2c90bbb3352bf91655cd0b11b67248bc53994ea2596b7eb30bbc71ea0e3"
+  },
+  "id": "Kc7SHowh3cwnD6Up",
+  "tags": []
+}

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración | Súper App</title>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-white min-h-screen relative overflow-x-hidden">
+    
+    <!-- Marca de agua de fondo -->
+    <div class="fixed inset-0 flex items-center justify-center opacity-[0.05] pointer-events-none z-0">
+        <img src="https://ideasypruebas2.es/cursos/IFCT0211/Belen/logo_gestion.png" alt="Watermark" class="w-[500px] grayscale">
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="relative z-10 p-6 md:p-12 min-h-screen flex flex-col">
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    Panel de <span class="text-indigo-600">Administración</span>
+                </h1>
+                <p class="text-slate-500 mt-2">Gestiona usuarios y el catálogo global del sistema</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Botón Menú Hamburguesa -->
+                <button id="menuBtn" class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-600 hover:text-indigo-600 hover:border-indigo-100 transition-all">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar Lateral -->
+        <div id="userSidebar" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 ease-in-out border-l border-slate-100 flex flex-col">
+            <!-- Header Sidebar -->
+            <div class="p-8 border-b border-slate-50 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-slate-900">Mi Perfil</h3>
+                <button id="closeSidebarBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Contenido Usuario -->
+            <div class="p-8 flex-1 overflow-y-auto">
+                <div class="text-center mb-8">
+                    <div class="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl border-4 border-white shadow-lg">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4 id="sideUserName" class="text-lg font-bold text-slate-900 leading-tight">...</h4>
+                    <p id="sideUserEmail" class="text-slate-400 text-sm mt-1">...</p>
+                </div>
+
+                <nav class="space-y-2">
+                    <a href="dashboard.html" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all font-semibold group">
+                        <i class="fas fa-arrow-left text-slate-400 group-hover:text-indigo-500"></i>
+                        <span>Volver al Menú</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Footer Sidebar (Logout) -->
+            <div class="p-8 border-t border-slate-50 bg-slate-50/50">
+                <button id="sideLogoutBtn" class="w-full flex items-center justify-center gap-3 py-4 bg-white border border-red-100 text-red-600 font-bold rounded-2xl hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Overlay para Sidebar -->
+        <div id="sidebarOverlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[65] transition-opacity duration-300"></div>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-8 flex-grow">
+            <!-- Gestión de Usuarios -->
+            <section class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900">Gestión de Usuarios</h2>
+                </div>
+                <p class="text-slate-500 text-sm mb-8">Administra el acceso de nuevos usuarios o desactiva cuentas existentes.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <button class="admin-action-btn flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all text-sm shadow-lg shadow-indigo-100" data-action="Crear usuario">
+                        <i class="fas fa-user-plus"></i>
+                        Crear usuario
+                    </button>
+                    <button class="admin-action-btn flex items-center justify-center gap-2 py-3 px-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all text-sm shadow-lg shadow-amber-100" data-action="Editar usuario">
+                        <i class="fas fa-edit"></i>
+                        Editar usuario
+                    </button>
+                    <button class="admin-action-btn flex items-center justify-center gap-2 py-3 px-4 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-slate-100 border border-slate-100 transition-all text-sm" data-action="Dar de baja usuario">
+                        <i class="fas fa-user-minus"></i>
+                        Dar de baja usuario
+                    </button>
+                </div>
+            </section>
+
+            <!-- Gestión de Catálogos -->
+            <section class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-th-large text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900">Gestión de Catálogos</h2>
+                </div>
+                <p class="text-slate-500 text-sm mb-8">Añade nuevas herramientas al mercado global o retira las que ya no se usen.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <button class="admin-action-btn flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all text-sm shadow-lg shadow-indigo-100" data-action="Crear catálogo">
+                        <i class="fas fa-plus-circle"></i>
+                        Crear catálogo
+                    </button>
+                    <button class="admin-action-btn flex items-center justify-center gap-2 py-3 px-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all text-sm shadow-lg shadow-amber-100" data-action="Editar catálogo">
+                        <i class="fas fa-edit"></i>
+                        Editar catálogo
+                    </button>
+                    <button class="admin-action-btn flex items-center justify-center gap-2 py-3 px-4 bg-teal-500 text-white font-bold rounded-xl hover:bg-teal-600 transition-all text-sm shadow-lg shadow-teal-100" data-action="Listar catálogo">
+                        <i class="fas fa-eye"></i>
+                        Listar catálogo
+                    </button>
+                    <button class="admin-action-btn flex items-center justify-center gap-2 py-3 px-4 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-slate-100 border border-slate-100 transition-all text-sm" data-action="Dar de baja catálogo">
+                        <i class="fas fa-minus-circle"></i>
+                        Dar de baja catálogo
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-20 pt-16 pb-8 text-center">
+            <p class="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">
+                © 2026 Gestión de Sistemas • Todos los derechos reservados
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal de Confirmación de Cierre de Sesión -->
+    <div id="logoutModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-indigo-50 text-indigo-600">
+                <i class="fas fa-sign-out-alt text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">¿Cerrar Sesión?</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">Estás a punto de salir del sistema. ¿Estás seguro de que deseas finalizar tu sesión actual?</p>
+            
+            <div class="flex flex-col gap-3">
+                <button id="confirmLogoutBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors text-sm">
+                    Sí, cerrar sesión
+                </button>
+                <button id="cancelLogoutBtn" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors text-sm">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Genérico para Notificaciones (Próximamente) -->
+    <div id="notificationModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-indigo-50 text-indigo-600">
+                <i class="fas fa-info-circle text-3xl"></i>
+            </div>
+            <h3 id="notificationTitle" class="text-xl font-bold text-slate-900 mb-2">Próximamente</h3>
+            <p id="notificationMessage" class="text-slate-500 text-sm mb-8 leading-relaxed">Esta funcionalidad estará disponible en la próxima actualización.</p>
+            
+            <button id="closeNotificationBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors text-sm">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Creación de Catálogo -->
+    <div id="catalogModal" class="hidden fixed inset-0 z-[60] overflow-y-auto bg-slate-950/90 backdrop-blur-sm p-4 md:p-8">
+        <div class="flex min-h-full items-center justify-center">
+            <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 my-auto">
+                <header class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-plus-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">Nuevo Catálogo</h3>
+                        <p class="text-slate-500 text-xs">Añade una herramienta al mercado</p>
+                    </div>
+                </div>
+                <button id="closeCatalogModalBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </header>
+
+            <form id="catalogForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nombre -->
+                    <div class="space-y-2">
+                        <label for="cat_nombre" class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Nombre</label>
+                        <div class="relative">
+                            <i class="fas fa-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="cat_nombre" name="nombre" required placeholder="Ej: Canva" 
+                                class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300">
+                        </div>
+                    </div>
+                    <!-- Imagen del Catálogo (Selector de Tipo) -->
+                    <div class="space-y-4 md:col-span-2 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Imagen del Catálogo</label>
+                            <div class="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                                <button type="button" id="btnTypeUrl" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm" data-type="url">
+                                    <i class="fas fa-link mr-1"></i> URL Externa
+                                </button>
+                                <button type="button" id="btnTypeFile" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600" data-type="file">
+                                    <i class="fas fa-upload mr-1"></i> Subir Archivo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Contenedor de URL -->
+                        <div id="containerUrl" class="relative">
+                            <i class="fas fa-image absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="url" id="cat_imagen" name="imagen" placeholder="https://ejemplo.com/imagen.png" 
+                                class="w-full pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300">
+                        </div>
+
+                        <!-- Contenedor de Archivo -->
+                        <div id="containerFile" class="hidden space-y-4">
+                            <div class="relative">
+                                <label for="cat_file" class="flex flex-col items-center justify-center gap-3 w-full py-8 px-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 font-medium cursor-pointer hover:border-indigo-300 hover:text-indigo-600 transition-all group">
+                                    <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
+                                        <i class="fas fa-cloud-upload-alt text-xl"></i>
+                                    </div>
+                                    <span id="fileLabel" class="text-sm">Arrastra o haz clic para subir captura</span>
+                                </label>
+                                <input type="file" id="cat_file" accept="image/*" class="hidden">
+                            </div>
+                            
+                            <!-- Preview de Imagen -->
+                            <div id="imagePreviewContainer" class="hidden relative w-full h-48 bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-inner group">
+                                <img id="imagePreview" src="" alt="Preview" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button type="button" id="removeImageBtn" class="px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-bold shadow-lg flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-all">
+                                        <i class="fas fa-trash-alt"></i> Eliminar y cambiar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 italic">* Elige una de las dos opciones para la identidad visual del catálogo.</p>
+                    </div>
+                </div>
+
+                <!-- Enlace -->
+                <div class="space-y-2">
+                    <label for="cat_enlace" class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Dirección Enlace</label>
+                    <div class="relative">
+                        <i class="fas fa-link absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="cat_enlace" name="direccion_enlace" required placeholder="Link de acceso" 
+                            class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300">
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="space-y-2">
+                    <label for="cat_descripcion" class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Descripción</label>
+                    <div class="relative">
+                        <i class="fas fa-align-left absolute left-4 top-4 text-slate-400"></i>
+                        <textarea id="cat_descripcion" name="descripcion" rows="3" required placeholder="Breve descripción del catálogo..." 
+                            class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300 resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div id="catalogFormError" class="hidden p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="catalogFormErrorMessage">Ocurrió un error al procesar la solicitud.</span>
+                </div>
+
+                <button type="submit" id="saveCatalogBtn" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-3">
+                    <i class="fas fa-save"></i>
+                    <span>Guardar Catálogo</span>
+                </button>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Baja de Usuario -->
+    <div id="deactivateUserModal" class="hidden fixed inset-0 z-[60] overflow-y-auto bg-slate-950/90 backdrop-blur-sm p-4 md:p-8">
+        <div class="flex min-h-full items-center justify-center">
+            <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 my-auto">
+                <header class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-4">
+                        <div id="userModalIconContainer" class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+                            <i id="userModalIcon" class="fas fa-user-minus text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 id="userModalTitle" class="text-xl font-bold text-slate-900">Baja de Usuario</h3>
+                            <p id="userModalSubtitle" class="text-slate-500 text-xs">Selecciona un usuario para desactivar su acceso</p>
+                        </div>
+                    </div>
+                    <button id="closeDeactivateModalBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </header>
+
+                <!-- Buscador -->
+                <div class="relative mb-6">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="userSearchInput" placeholder="Buscar por nombre, usuario o correo..." 
+                        class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300">
+                </div>
+
+                <!-- Lista de Usuarios -->
+                <div class="overflow-hidden border border-slate-100 rounded-2xl mb-6">
+                    <div class="max-h-[400px] overflow-y-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usuario</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contacto</th>
+                                    <th class="px-4 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody" class="divide-y divide-slate-50">
+                                <!-- Cargando... -->
+                                <tr>
+                                    <td colspan="3" class="px-4 py-12 text-center text-slate-400">
+                                        <i class="fas fa-circle-notch animate-spin text-2xl mb-2"></i>
+                                        <p class="text-xs">Cargando usuarios...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="deactivateFormError" class="hidden p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl flex items-center gap-3 mb-6">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="deactivateFormErrorMessage">Error al cargar usuarios.</span>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl">
+                    <div class="flex gap-3">
+                        <i class="fas fa-exclamation-triangle text-amber-500 mt-1"></i>
+                        <p class="text-[11px] text-amber-700 leading-relaxed">
+                            <strong>Nota importante:</strong> La baja de un usuario es reversible desde la base de datos, pero el usuario perderá acceso inmediato a todas las herramientas del ecosistema.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Creación de Usuario -->
+    <div id="createUserModal" class="hidden fixed inset-0 z-[60] overflow-y-auto bg-slate-950/90 backdrop-blur-sm p-4 md:p-8">
+        <div class="flex min-h-full items-center justify-center">
+            <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 my-auto">
+                <header class="flex justify-between items-center mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                            <i class="fas fa-user-plus text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Nuevo Usuario</h3>
+                            <p class="text-slate-500 text-xs">Registra un nuevo acceso al sistema</p>
+                        </div>
+                    </div>
+                    <button id="closeCreateUserModalBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </header>
+
+                <form id="createUserForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Nombre -->
+                        <div class="space-y-1">
+                            <label for="user_nombre" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Nombre</label>
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="user_nombre" name="nombre" required placeholder="Ej: Elena" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+                        <!-- Apellido -->
+                        <div class="space-y-1">
+                            <label for="user_apellido" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Apellido</label>
+                            <div class="relative">
+                                <i class="fas fa-signature absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="user_apellido" name="apellido" required placeholder="Ej: Ríos" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Correo -->
+                    <div class="space-y-1">
+                        <label for="user_correo" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Correo Electrónico</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="email" id="user_correo" name="correo" required placeholder="elena@email.com" 
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Usuario -->
+                        <div class="space-y-1">
+                            <label for="user_usuario" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Nombre de Usuario</label>
+                            <div class="relative">
+                                <i class="fas fa-at absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="user_usuario" name="usuario" required placeholder="elena" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+                        <!-- Contraseña -->
+                        <div class="space-y-1">
+                            <label for="user_contraseya" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Contraseña</label>
+                            <div class="relative">
+                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="password" id="user_contraseya" name="contraseya" required placeholder="••••" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rol -->
+                    <div class="space-y-1">
+                        <label for="user_rol" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Rol del Sistema</label>
+                        <div class="relative">
+                            <i class="fas fa-user-shield absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <select id="user_rol" name="rol" required 
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none">
+                                <option value="0">Usuario estándar</option>
+                                <option value="1">Administrador</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div id="createUserFormError" class="hidden p-4 bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl flex items-center gap-3">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="createUserFormErrorMessage">Error al crear usuario.</span>
+                    </div>
+
+                    <button type="submit" id="saveUserBtn" class="w-full mt-4 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-3 text-sm">
+                        <i class="fas fa-user-check"></i>
+                        <span>Guardar Usuario</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Baja de Usuario -->
+    <div id="confirmDeactivateModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-red-50 text-red-600">
+                <i class="fas fa-user-slash text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">¿Confirmar Baja?</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">
+                Estás a punto de dar de baja al usuario <span id="confirmDeactivateName" class="font-bold text-slate-700">...</span>. Esta acción revocará su acceso inmediatamente.
+            </p>
+            
+            <div class="flex flex-col gap-3">
+                <button id="finalConfirmDeactivateBtn" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors text-sm shadow-lg shadow-red-100">
+                    Confirmar Baja
+                </button>
+                <button id="cancelDeactivateBtn" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors text-sm">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Baja de Catálogo (Listado) -->
+    <div id="deactivateCatalogModal" class="hidden fixed inset-0 z-[60] overflow-y-auto bg-slate-950/90 backdrop-blur-sm p-4 md:p-8">
+        <div class="flex min-h-full items-center justify-center">
+            <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 my-auto">
+                <header class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-4">
+                        <div id="catalogModalIconContainer" class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+                            <i id="catalogModalIcon" class="fas fa-minus-circle text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 id="catalogModalTitle" class="text-xl font-bold text-slate-900">Baja de Catálogo</h3>
+                            <p id="catalogModalSubtitle" class="text-slate-500 text-xs">Selecciona un elemento del catálogo para retirarlo</p>
+                        </div>
+                    </div>
+                    <button id="closeDeactivateCatalogModalBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </header>
+
+                <!-- Buscador -->
+                <div class="relative mb-6">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="catalogSearchInput" placeholder="Buscar por nombre o descripción..." 
+                        class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300">
+                </div>
+
+                <!-- Lista de Catálogos -->
+                <div class="overflow-hidden border border-slate-100 rounded-2xl mb-6">
+                    <div class="max-h-[400px] overflow-y-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Herramienta</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Descripción</th>
+                                    <th class="px-4 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="catalogTableBody" class="divide-y divide-slate-50">
+                                <!-- Cargando... -->
+                                <tr>
+                                    <td colspan="3" class="px-4 py-12 text-center text-slate-400">
+                                        <i class="fas fa-circle-notch animate-spin text-2xl mb-2"></i>
+                                        <p class="text-xs">Cargando catálogo...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="catalogDeactivateError" class="hidden p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="catalogDeactivateErrorMessage">Error al cargar el catálogo.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Baja de Catálogo -->
+    <div id="confirmCatalogDeactivateModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-red-50 text-red-600">
+                <i class="fas fa-trash-alt text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">¿Retirar Catálogo?</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">
+                Estás a punto de retirar <span id="confirmCatalogName" class="font-bold text-slate-700">...</span> del catálogo global. Esta acción es irreversible.
+            </p>
+            
+            <div class="flex flex-col gap-3">
+                <button id="finalConfirmCatalogBtn" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors text-sm shadow-lg shadow-red-100">
+                    Confirmar Retirada
+                </button>
+                <button id="cancelCatalogDeactivateBtn" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors text-sm">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Listar Catálogo -->
+    <div id="listarCatalogModal" class="hidden fixed inset-0 z-[60] overflow-y-auto bg-slate-950/90 backdrop-blur-sm p-4 md:p-8">
+        <div class="flex min-h-full items-center justify-center">
+            <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 my-auto">
+                <header class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600">
+                            <i class="fas fa-eye text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Catálogos Disponibles</h3>
+                            <p class="text-slate-500 text-xs">Listado completo de herramientas del mercado</p>
+                        </div>
+                    </div>
+                    <button id="closeListarCatalogModalBtn" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </header>
+
+                <div class="overflow-hidden border border-slate-100 rounded-2xl">
+                    <div class="max-h-[500px] overflow-y-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Icono</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nombre</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Descripción</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Enlace</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listarCatalogTableBody" class="divide-y divide-slate-50">
+                                <tr>
+                                    <td colspan="4" class="px-4 py-12 text-center text-slate-400">
+                                        <i class="fas fa-circle-notch animate-spin text-2xl mb-2"></i>
+                                        <p class="text-xs">Cargando catálogo...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="listarCatalogError" class="hidden mt-6 p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="listarCatalogErrorMessage">Error al cargar el catálogo.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/admin.js"></script>
+</body>
+</html>

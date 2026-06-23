@@ -1,0 +1,24 @@
+{
+  "name": "Súper App Multiapp",
+  "short_name": "Súper App",
+  "description": "Ecosistema de mini-aplicaciones para gestión empresarial",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://ideasypruebas2.es/cursos/IFCT0211/Belen/logo_gestion.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://ideasypruebas2.es/cursos/IFCT0211/Belen/logo_gestion.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
