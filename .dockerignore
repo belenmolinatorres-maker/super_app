@@ -4,5 +4,6 @@ node_modules
 *.md
 .gemini
 Flujos
-bd
 proyecto super app.zip
+src/.env
+src/.env.example

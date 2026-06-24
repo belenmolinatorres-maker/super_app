@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const pool = require('../config/db');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
 
 const router = Router();
 
@@ -16,7 +16,7 @@ router.post('/listar-catalogo', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/alta-catalogo', verifyToken, async (req, res) => {
+router.post('/alta-catalogo', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { Datos } = req.body;
     if (!Datos || !Datos.nombre || !Datos.imagen) {
@@ -34,7 +34,7 @@ router.post('/alta-catalogo', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/editar-catalogo', verifyToken, async (req, res) => {
+router.post('/editar-catalogo', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { Datos } = req.body;
     if (!Datos || !Datos.id_catalogo) {
@@ -52,7 +52,7 @@ router.post('/editar-catalogo', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/baja-catalogo', verifyToken, async (req, res) => {
+router.post('/baja-catalogo', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { id_catalogo } = req.body;
     if (!id_catalogo) {

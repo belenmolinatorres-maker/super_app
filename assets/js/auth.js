@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * Procesa la respuesta del webhook de n8n.
+     * Procesa la respuesta del servidor.
      * @param {Object} data - Respuesta JSON del servidor.
      */
     function handleAuthResponse(data) {

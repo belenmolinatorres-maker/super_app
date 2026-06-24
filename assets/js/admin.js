@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deactivateFormError.classList.add('hidden');
 
         try {
-            const response = await fetch('/api/listar_usuario', {
+            const response = await fetch('/api/listar-usuario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token: token })
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             finalConfirmDeactivateBtn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> Procesando...';
 
             try {
-                const response = await fetch('/api/baja_usuario', {
+                const response = await fetch('/api/baja-usuario', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchAndRenderListarCatalogo = async () => {
         try {
-            const response = await fetch('/api/listar_catalogo', {
+            const response = await fetch('/api/listar-catalogo', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -470,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
         catalogDeactivateError.classList.add('hidden');
 
         try {
-            const response = await fetch('/api/listar_catalogo', {
+            const response = await fetch('/api/listar-catalogo', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
             finalConfirmCatalogBtn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> Procesando...';
 
             try {
-                const response = await fetch('/api/baja_catalogo', {
+                const response = await fetch('/api/baja-catalogo', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
             createUserFormError.classList.add('hidden');
 
             try {
-                const endpoint = isEditing ? 'editar_usuario' : 'alta_usuario';
+                const endpoint = isEditing ? 'editar-usuario' : 'alta-usuario';
                 const response = await fetch(`/api/${endpoint}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -943,9 +943,9 @@ document.addEventListener('DOMContentLoaded', () => {
             catalogFormError.classList.add('hidden');
 
             try {
-                console.log('Enviando datos a n8n:', data); // Debug para el desarrollador
+                //console.log('Enviando datos al servidor:', data); // Debug para el desarrollador
                 
-                const endpoint = isEditing ? 'editar_catalogo' : 'alta_catologo';
+                const endpoint = isEditing ? 'editar-catalogo' : 'alta-catalogo';
                 const response = await fetch(`/api/${endpoint}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -971,7 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     notificationMessage.innerHTML = msg;
                     notificationModal.classList.remove('hidden');
                 } else {
-                    throw new Error(result.mensaje || result.message || 'Error en el servidor de n8n');
+                    throw new Error(result.mensaje || result.message || 'Error en el servidor');
                 }
             } catch (error) {
                 console.error('Error en la petición:', error);
@@ -1010,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmLogoutBtn.disabled = true;
             confirmLogoutBtn.innerHTML = '<i class="fas fa-circle-notch animate-spin mr-2"></i>Cerrando...';
             try {
-                await fetch('/api/logoult', {
+                await fetch('/api/logout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: token })

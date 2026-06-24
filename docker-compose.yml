@@ -1,9 +1,41 @@
 services:
+  db:
+    image: mysql:8.0
+    container_name: super-app-db
+    command: --log-bin-trust-function-creators=1 --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword2026
+      MYSQL_DATABASE: app_multiapp
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
   api:
     build: .
     container_name: super-app-backend
     ports:
       - "3000:3000"
-    env_file:
-      - src/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: rootpassword2026
+      DB_NAME: app_multiapp
+      JWT_SECRET: MiClaveSuperSecreta2026
+      JWT_EXPIRES_IN: 24h
+      PORT: "3000"
+      SMTP_HOST: mail.buscador.nidea-soluciones.com
+      SMTP_PORT: "25"
+      SMTP_USER: belen@buscador.nidea-soluciones.com
+      SMTP_PASS: Tyhdl14|,23|
+      SMTP_FROM: "Súper App <belen@buscador.nidea-soluciones.com>"
+      BASE_URL: http://localhost:3000
+    depends_on:
+      - db
     restart: unless-stopped
+
+volumes:
+  db_data:

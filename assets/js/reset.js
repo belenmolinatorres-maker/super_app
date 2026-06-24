@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * REGLA: BLOQUEO DE PETICIONES AUTOMÁTICAS
      * El script permanece pasivo. No hay ningún fetch automático al cargar la página.
-     * Solo se comunica con n8n tras la validación manual del usuario.
+     * Solo se comunica con el servidor tras la validación manual del usuario.
      */
     if (resetForm) {
         resetForm.addEventListener('submit', async (e) => {
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setLoading(true);
 
             try {
-                // ÚNICO PUNTO DE CONTACTO CON EL SERVIDOR DE n8n
+                // ÚNICO PUNTO DE CONTACTO CON EL SERVIDOR
                 const response = await fetch('/api/resetear', {
                     method: 'POST',
                     headers: {
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rawData = await response.json();
                 const data = Array.isArray(rawData) ? rawData[0] : rawData;
 
-                // Procesamiento de respuesta n8n: { "codigo": 1, "mensaje": "..." }
+                // Procesamiento de respuesta: { "codigo": 1, "mensaje": "..." }
                 if (data.codigo === 1 || data.codigo === "1") {
                     // Mostrar modal de éxito estético
                     if (statusModal) {
